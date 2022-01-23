@@ -101,21 +101,21 @@ function App() {
   const [feedback, setFeedback] = useState(`Click buy to mint your NFT.`);
   const [mintAmount, setMintAmount] = useState(1);
   const [CONFIG, SET_CONFIG] = useState({
-    CONTRACT_ADDRESS: "",
-    SCAN_LINK: "",
+    CONTRACT_ADDRESS: "0x3550cDc66e133E7a4c8F687A8985fDD107E5bD3F",
+    SCAN_LINK: "https://esc.elastos.io/token/0x3550cDc66e133E7a4c8F687A8985fDD107E5bD3F/",
     NETWORK: {
-      NAME: "",
-      SYMBOL: "",
-      ID: 0
+      NAME: "Elastos",
+      SYMBOL: "ELA",
+      ID: 20
     },
-    NFT_NAME: "",
-    SYMBOL: "",
-    MAX_SUPPLY: 1,
-    WEI_COST: 0,
-    DISPLAY_COST: 0,
-    GAS_LIMIT: 0,
-    MARKETPLACE: "",
-    MARKETPLACE_LINK: "",
+    NFT_NAME: "Bunny Punk",
+    SYMBOL: "BUN",
+    MAX_SUPPLY: 1000,
+    WEI_COST: 30000000000000000000,
+    DISPLAY_COST: 30,
+    GAS_LIMIT: 285000000,
+    MARKETPLACE: "ElaCity",
+    MARKETPLACE_LINK: "https://ela.city/marketplace/shops/0x9a754044fbfa95d15b252453c1bb5401320a8386",
     SHOW_BACKGROUND: false
   });
 
