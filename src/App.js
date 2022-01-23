@@ -283,16 +283,7 @@ function App() {
                       Connect to the {CONFIG.NETWORK.NAME} network
                     </s.TextDescription>
                     <s.SpacerSmall />
-                    <StyledButton
-                      onClick={(e) => {
-                        e.preventDefault();
-                        dispatch(connect());
-                        getData();
-                      }}
-                    >
-                      CONNECT METAMASK
-                    </StyledButton>
-
+                        
                     <StyledButton
                       onClick={(e) => {
                         e.preventDefault();
