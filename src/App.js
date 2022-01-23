@@ -100,24 +100,6 @@ function App() {
   const [claimingNft, setClaimingNft] = useState(false);
   const [feedback, setFeedback] = useState(`Click buy to mint your NFT.`);
   const [mintAmount, setMintAmount] = useState(1);
-  const [CONFIG, SET_CONFIG] = useState({
-    CONTRACT_ADDRESS: "",
-    SCAN_LINK: "",
-    NETWORK: {
-      NAME: "",
-      SYMBOL: "",
-      ID: 
-    },
-    NFT_NAME: "",
-    SYMBOL: "",
-    MAX_SUPPLY: 1,
-    WEI_COST: 1,
-    DISPLAY_COST: 1,
-    GAS_LIMIT: 1,
-    MARKETPLACE: "",
-    MARKETPLACE_LINK: "",
-    SHOW_BACKGROUND: false
-  });
 
   const claimNFTs = () => {
     let cost = CONFIG.WEI_COST;
