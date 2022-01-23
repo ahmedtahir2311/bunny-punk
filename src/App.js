@@ -22,7 +22,7 @@ export const StyledButton = styled.button`
   padding: 10px;
   font-weight: bold;
   color: var(--secondary-text);
-  width: 100px;
+  width: fit-content;
   cursor: pointer;
   :active {
     box-shadow: none;
