@@ -8,7 +8,7 @@ const injected = new InjectedConnector({
 
 const walletconnect = new WalletConnectConnector({
   rpc: { 20: "https://api.elastos.io/eth" },
-  network: "Elastos",
+  network: "cronos",
   qrcode: true,
   pollingInterval: 12000
 });
