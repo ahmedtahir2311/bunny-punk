@@ -14,8 +14,8 @@ const injected = new InjectedConnector({
 });
 
 const walletconnect = new WalletConnectConnector({
-  rpc: { 25: "https://evm-cronos.crypto.org" },
-  network: "cronos",
+  rpc: { 20: "https://api.elastos.io/eth" },
+  network: "Elastos",
   qrcode: true,
   pollingInterval: 12000
 });
