@@ -1,9 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { connect } from "./redux/blockchain/blockchainActions";
+import {
+  connect,
+  walletconnect_connect
+} from "./redux/blockchain/blockchainActions";
 import { fetchData } from "./redux/data/dataActions";
 import * as s from "./styles/globalStyles";
 import styled from "styled-components";
+import { Web3ReactProvider } from "@web3-react/core";
+import { Web3Provider } from "@ethersproject/providers";
+import WalletConnectApp from "./Components/WalletConnectApp.js";
 
 const truncate = (input, len) =>
   input.length > len ? `${input.substring(0, len)}...` : input;
@@ -138,7 +144,7 @@ function App() {
       .then((receipt) => {
         console.log(receipt);
         setFeedback(
-          `WOW, the ${CONFIG.NFT_NAME} is yours! go visit EbisusBay to view it.`
+          `WOW, the ${CONFIG.NFT_NAME} is yours! go visit Opensea.io to view it.`
         );
         setClaimingNft(false);
         dispatch(fetchData(blockchain.account));
@@ -284,21 +290,18 @@ function App() {
                         getData();
                       }}
                     >
-                      Metamask
+                      CONNECT METAMASK
                     </StyledButton>
-
 
                     <StyledButton
                       onClick={(e) => {
                         e.preventDefault();
-                        dispatch(walletconnect());
+                        dispatch(walletconnect_connect());
                         getData();
                       }}
                     >
-                      WalletConnect
+                      CONNECT WALLETCONNECT
                     </StyledButton>
-
-
                     {blockchain.errorMsg !== "" ? (
                       <>
                         <s.SpacerSmall />
@@ -345,6 +348,7 @@ function App() {
                         {mintAmount}
                       </s.TextDescription>
                       <s.SpacerMedium />
+
                       <StyledRoundButton
                         disabled={claimingNft ? 1 : 0}
                         onClick={(e) => {
@@ -402,7 +406,10 @@ function App() {
               color: "var(--primary-text)"
             }}
           >
-            
+            Cronos Red Pandas is a collection of 5,000 randomly generated NFTs.
+            Each panda is generated from a pool of over 180 possible traits.
+            Each trait has its own rarity which creates a truly unique red
+            panda.
           </s.TextDescription>
         </s.Container>
       </s.Container>
