@@ -284,8 +284,21 @@ function App() {
                         getData();
                       }}
                     >
-                      CONNECT
+                      Metamask
                     </StyledButton>
+
+
+                    <StyledButton
+                      onClick={(e) => {
+                        e.preventDefault();
+                        dispatch(walletconnect());
+                        getData();
+                      }}
+                    >
+                      WalletConnect
+                    </StyledButton>
+
+
                     {blockchain.errorMsg !== "" ? (
                       <>
                         <s.SpacerSmall />
