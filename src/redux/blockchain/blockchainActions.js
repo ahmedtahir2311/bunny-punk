@@ -10,7 +10,7 @@ import { InjectedConnector } from "@web3-react/injected-connector";
 import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 import "../../Components/WalletConnectApp.css";
 const injected = new InjectedConnector({
-  supportedChainIds: [25]
+  supportedChainIds: [20]
 });
 
 const walletconnect = new WalletConnectConnector({
