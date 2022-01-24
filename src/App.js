@@ -406,10 +406,7 @@ function App() {
               color: "var(--primary-text)"
             }}
           >
-            Cronos Red Pandas is a collection of 5,000 randomly generated NFTs.
-            Each panda is generated from a pool of over 180 possible traits.
-            Each trait has its own rarity which creates a truly unique red
-            panda.
+           
           </s.TextDescription>
         </s.Container>
       </s.Container>
