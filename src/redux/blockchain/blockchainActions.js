@@ -176,7 +176,7 @@ export const walletconnect_connect = () => {
 
     const provider = new WalletConnectProvider({
       rpc: {
-        25: "https://evm-cronos.crypto.org"
+        20: "https://api.elastos.io/eth"
       }
     });
 
