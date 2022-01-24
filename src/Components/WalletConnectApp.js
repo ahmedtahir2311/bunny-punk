@@ -3,12 +3,12 @@ import { InjectedConnector } from "@web3-react/injected-connector";
 import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 import "./WalletConnectApp.css";
 const injected = new InjectedConnector({
-  supportedChainIds: [25]
+  supportedChainIds: [20]
 });
 
 const walletconnect = new WalletConnectConnector({
-  rpc: { 25: "https://evm-cronos.crypto.org" },
-  network: "cronos",
+  rpc: { 20: "https://api.elastos.io/eth" },
+  network: "Elastos",
   qrcode: true,
   pollingInterval: 12000
 });
