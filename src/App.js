@@ -276,7 +276,7 @@ function App() {
                         getData();
                       }}
                     >
-                      CONNECT METAMASK
+                      Connect Wallet
                     </StyledButton>
 
                     {blockchain.errorMsg !== "" ? (
