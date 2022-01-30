@@ -1,59 +1,31 @@
 // constants
-import Web3EthContract from "web3-eth-contract";
 import Web3 from "web3";
+import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
+import { config, abi } from "../../config.js"
 
 // log
-import { fetchData } from "../data/dataActions";
-import { useWeb3React } from "@web3-react/core";
-import { InjectedConnector } from "@web3-react/injected-connector";
-import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
-import "../../Components/WalletConnectApp.css";
-const injected = new InjectedConnector({
-  supportedChainIds: [20]
-});
-
-const walletconnect = new WalletConnectConnector({
-  rpc: { 20: "https://api.elastos.io/eth" },
-  network: "Elastos",
-  qrcode: true,
-  pollingInterval: 12000
-});
-
-function WalletConnectApp() {
-  const {
-    active,
-    account,
-    chainId,
-    library,
-    connector,
-    activate,
-    deactivate
-  } = useWeb3React();
-
-  const connectInjected = async () => {
-    try {
-      await activate(injected);
-    } catch (ex) {
-      console.log(ex);
+import { fetchData, fetchDataSuccess } from "../data/dataActions";
+let web3Modal = "";
+let provider = "";
+const init = () => {
+  const providerOptions = {
+    walletconnect: {
+      package: WalletConnectProvider,
+      options: {
+        rpc: {
+          1: `https://mainnet.infura.io/v3/f64084d938db45b4b54b604b6593bf71`,
+          20: 'https://api.elastos.io/eth',
+          128: 'https://http-mainnet.hecochain.com',
+        },
+        bridge: 'https://walletconnect.elastos.net/v2',
+      }
     }
   };
-
-  const connectWalletConnect = async () => {
-    try {
-      await activate(walletconnect);
-    } catch (ex) {
-      console.log(ex);
-    }
-  };
-
-  async function disconnect() {
-    try {
-      deactivate();
-    } catch (ex) {
-      console.log(ex);
-    }
-  }
+  web3Modal = new Web3Modal({
+    cacheProvider: false,
+    providerOptions,
+  });
 }
 
 const connectRequest = () => {
@@ -83,47 +55,24 @@ const updateAccountRequest = (payload) => {
   };
 };
 
-//function getLibrary(provider) {
-// const library = new Web3Provider(provider);
-//library.pollingInterval = 12000;
-//return library;
-//}
 
 //  Create WalletConnect Provider
 
 export const connect = () => {
+  init()
   return async (dispatch) => {
     dispatch(connectRequest());
-    const abiResponse = await fetch("/config/abi.json", {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json"
-      }
-    });
-    const abi = await abiResponse.json();
-    const configResponse = await fetch("/config/config.json", {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json"
-      }
-    });
-    const CONFIG = await configResponse.json();
-    const { ethereum } = window;
-    const metamaskIsInstalled = ethereum && ethereum.isMetaMask;
-    if (metamaskIsInstalled) {
-      Web3EthContract.setProvider(ethereum);
-      let web3 = new Web3(ethereum);
+    try {
+      provider = await web3Modal.connect();
+      console.log(provider)
+      let web3 = new Web3(provider);
       try {
-        const accounts = await ethereum.request({
-          method: "eth_requestAccounts"
-        });
-        const networkId = await ethereum.request({
-          method: "net_version"
-        });
-        if (networkId == CONFIG.NETWORK.ID) {
-          const SmartContractObj = new Web3EthContract(
+        const accounts = await web3.eth.getAccounts();
+        const networkId = await web3.eth.getChainId()
+        if (networkId == config.NETWORK.ID) {
+          const SmartContractObj = new web3.eth.Contract(
             abi,
-            CONFIG.CONTRACT_ADDRESS
+            config.CONTRACT_ADDRESS
           );
           dispatch(
             connectSuccess({
@@ -132,97 +81,56 @@ export const connect = () => {
               web3: web3
             })
           );
-          // Add listeners start
-          ethereum.on("accountsChanged", (accounts) => {
+          provider.on("accountsChanged", (accounts) => {
             dispatch(updateAccount(accounts[0]));
           });
-          ethereum.on("chainChanged", () => {
-            window.location.reload();
-          });
-          // Add listeners end
         } else {
-          dispatch(connectFailed(`Change network to ${CONFIG.NETWORK.NAME}.`));
+          try {
+            await provider.request({
+              method: 'wallet_switchEthereumChain',
+              params: [
+                {
+                  chainId: '0x14'
+                }
+              ]
+            })
+            dispatch(connect());
+          }
+          catch {
+            dispatch(connectFailed(`Change network to ${config.NETWORK.NAME}.`));
+          }
         }
       } catch (err) {
-        dispatch(connectFailed("Something went wrong."));
+        console.log(err)
+        dispatch(connectFailed(err.message));
       }
-    } else {
-      dispatch(connectFailed("Install Metamask."));
+
+    } catch (e) {
+      dispatch(connectFailed(e.message));
+      return;
     }
   };
 };
 
-export const walletconnect_connect = () => {
+export const disconnect = () => {
   return async (dispatch) => {
-    dispatch(connectRequest());
-    const abiResponse = await fetch("/config/abi.json", {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json"
-      }
-    });
-    const abi = await abiResponse.json();
-    const configResponse = await fetch("/config/config.json", {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json"
-      }
-    });
-    const CONFIG = await configResponse.json();
-
-    const { ethereum } = window;
-
-    Web3EthContract.setProvider(ethereum);
-
-    const provider = new WalletConnectProvider({
-      rpc: {
-        20: "https://api.elastos.io/eth"
-      }
-    });
-
-    //  Enable session (triggers QR Code modal)
-    await provider.enable();
-
-    //  Create Web3
-    const web3 = new Web3(provider);
-    console.log("web3", web3);
-
-    try {
-      const accounts = await ethereum.request({
-        method: "eth_requestAccounts"
-      });
-      const networkId = await ethereum.request({
-        method: "net_version"
-      });
-      if (networkId == CONFIG.NETWORK.ID) {
-        const SmartContractObj = new Web3EthContract(
-          abi,
-          CONFIG.CONTRACT_ADDRESS
-        );
-        dispatch(
-          connectSuccess({
-            account: accounts[0],
-            smartContract: SmartContractObj,
-            web3: web3
-          })
-        );
-        // Add listeners start
-        ethereum.on("accountsChanged", (accounts) => {
-          dispatch(updateAccount(accounts[0]));
-        });
-        ethereum.on("chainChanged", () => {
-          window.location.reload();
-        });
-        // Add listeners end
-      } else {
-        dispatch(connectFailed(`Change network to ${CONFIG.NETWORK.NAME}.`));
-      }
-    } catch (err) {
-      dispatch(connectFailed("Something went wrong."));
+    if (provider.close) {
+      await provider.close();
+      await web3Modal.clearCachedProvider();
+      provider = null
     }
-  };
-};
-
+    dispatch(
+      connectSuccess({
+        account: null,
+        smartContract: null,
+        web3: null,
+        loading: false
+      }),
+      );
+    dispatch(connectFailed(""))
+    dispatch(fetchDataSuccess(0,0))
+  }
+}
 export const updateAccount = (account) => {
   return async (dispatch) => {
     dispatch(updateAccountRequest({ account: account }));

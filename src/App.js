@@ -2,14 +2,16 @@ import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   connect,
-  walletconnect_connect
+  disconnect
 } from "./redux/blockchain/blockchainActions";
 import { fetchData } from "./redux/data/dataActions";
+import { config, abi } from "./config.js"
+
 import * as s from "./styles/globalStyles";
 import styled from "styled-components";
-import { Web3ReactProvider } from "@web3-react/core";
-import { Web3Provider } from "@ethersproject/providers";
-import WalletConnectApp from "./Components/WalletConnectApp.js";
+// import { Web3ReactProvider } from "@web3-react/core";
+// import { Web3Provider } from "@ethersproject/providers";
+// import WalletConnectApp from "./Components/WalletConnectApp.js";
 
 const truncate = (input, len) =>
   input.length > len ? `${input.substring(0, len)}...` : input;
@@ -100,47 +102,41 @@ function App() {
   const [claimingNft, setClaimingNft] = useState(false);
   const [feedback, setFeedback] = useState(`Click buy to mint your NFT.`);
   const [mintAmount, setMintAmount] = useState(1);
-  const [CONFIG, SET_CONFIG] = useState({
-    CONTRACT_ADDRESS: "",
-    SCAN_LINK: "",
-    NETWORK: {
-      NAME: "",
-      SYMBOL: "",
-      ID: 0
-    },
-    NFT_NAME: "",
-    SYMBOL: "",
-    MAX_SUPPLY: 1,
-    WEI_COST: 0,
-    DISPLAY_COST: 0,
-    GAS_LIMIT: 0,
-    MARKETPLACE: "",
-    MARKETPLACE_LINK: "",
-    SHOW_BACKGROUND: false
-  });
+  const [CONFIG] = useState(config);
 
-  const claimNFTs = () => {
+  const claimNFTs = async () => {
+
     let cost = CONFIG.WEI_COST;
-    let gasLimit = CONFIG.GAS_LIMIT;
-    let totalCostWei = String(cost * mintAmount);
-    let totalGasLimit = String(gasLimit * mintAmount);
-    console.log("Cost: ", totalCostWei);
-    console.log("Gas limit: ", totalGasLimit);
+
+    let ethValue = blockchain.web3.utils.fromWei(cost.toString(), "ether") * Number(mintAmount);
+    let value = blockchain.web3.utils.toWei(ethValue.toString(), "ether")
+
+    let tx = {
+      to: CONFIG.CONTRACT_ADDRESS,
+      from: blockchain.account,
+      value: value,
+    }
+
     setFeedback(`Minting your ${CONFIG.NFT_NAME}...`);
     setClaimingNft(true);
-    blockchain.smartContract.methods
-      .mint(mintAmount)
-      .send({
-        gasLimit: String(totalGasLimit),
-        to: CONFIG.CONTRACT_ADDRESS,
-        from: blockchain.account,
-        value: totalCostWei
-      })
-      .once("error", (err) => {
-        console.log(err);
-        setFeedback("Sorry, something went wrong please try again later.");
+
+    console.log(blockchain.web3.currentProvider.accounts)
+    if (blockchain.web3.currentProvider.accounts && blockchain.web3.currentProvider.accounts.length) {
+      try {
+        let gas = await blockchain.smartContract.methods
+          .mint().estimateGas(tx)
+        tx.gas = blockchain.web3.utils.toHex(gas)
+      } catch (err) {
+        setFeedback("Insufficient Funds");
         setClaimingNft(false);
-      })
+        return
+      }
+    }
+
+    console.log("tx", tx)
+    blockchain.smartContract.methods
+      .mint()
+      .send(tx)
       .then((receipt) => {
         console.log(receipt);
         setFeedback(
@@ -148,6 +144,11 @@ function App() {
         );
         setClaimingNft(false);
         dispatch(fetchData(blockchain.account));
+      }).catch(err => {
+        console.log(err);
+        setMintAmount(1)
+        setFeedback("Sorry, something went wrong please try again later.");
+        setClaimingNft(false);
       });
   };
 
@@ -172,21 +173,6 @@ function App() {
       dispatch(fetchData(blockchain.account));
     }
   };
-
-  const getConfig = async () => {
-    const configResponse = await fetch("/config/config.json", {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json"
-      }
-    });
-    const config = await configResponse.json();
-    SET_CONFIG(config);
-  };
-
-  useEffect(() => {
-    getConfig();
-  }, []);
 
   useEffect(() => {
     getData();
@@ -293,15 +279,6 @@ function App() {
                       CONNECT METAMASK
                     </StyledButton>
 
-                    <StyledButton
-                      onClick={(e) => {
-                        e.preventDefault();
-                        dispatch(walletconnect_connect());
-                        getData();
-                      }}
-                    >
-                      CONNECT WALLETCONNECT
-                    </StyledButton>
                     {blockchain.errorMsg !== "" ? (
                       <>
                         <s.SpacerSmall />
@@ -371,6 +348,15 @@ function App() {
                       >
                         {claimingNft ? "BUSY" : "BUY"}
                       </StyledButton>
+
+                      <StyledButton
+                      onClick={(e) => {
+                        e.preventDefault();
+                        dispatch(disconnect());
+                      }}
+                    >
+                      DISCONNECT
+                    </StyledButton>
                     </s.Container>
                   </>
                 )}

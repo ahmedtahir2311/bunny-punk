@@ -7,7 +7,7 @@ const fetchDataRequest = () => {
   };
 };
 
-const fetchDataSuccess = (payload) => {
+export const fetchDataSuccess = (payload) => {
   return {
     type: "CHECK_DATA_SUCCESS",
     payload: payload,
@@ -29,15 +29,14 @@ export const fetchData = () => {
         .getState()
         .blockchain.smartContract.methods.totalSupply()
         .call();
-      // let cost = await store
-      //   .getState()
-      //   .blockchain.smartContract.methods.cost()
-      //   .call();
-
+      let maxSupply = await store
+        .getState()
+        .blockchain.smartContract.methods.maxSupply()
+        .call();
       dispatch(
         fetchDataSuccess({
           totalSupply,
-          // cost,
+          maxSupply
         })
       );
     } catch (err) {
