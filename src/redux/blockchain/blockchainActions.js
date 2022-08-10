@@ -2,7 +2,7 @@
 import Web3 from "web3";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { config, abi } from "../../config.js"
+import { config, abi, SWAP_REWARD_CHEF_ABI, SWAP_REWARD_CHEF_ADDRESS, MASTER_CHEF_ABI, MASTER_CHEF_ADDRESS, BUNNY_TOKEN_ABI, BUNNY_TOKEN_ADDRESS, BUNNY_VAULT_ABI, BUNNY_VAULT_ADDRESS } from "../../config.js"
 
 // log
 import { fetchData, fetchDataSuccess } from "../data/dataActions";
@@ -69,15 +69,36 @@ export const connect = () => {
       try {
         const accounts = await web3.eth.getAccounts();
         const networkId = await web3.eth.getChainId()
-        if (networkId == config.NETWORK.ID) {
+        // if (networkId == config.NETWORK.ID) {
+        if (true) {
           const SmartContractObj = new web3.eth.Contract(
             abi,
             config.CONTRACT_ADDRESS
+          );
+          const SRCSmartContractObj = new web3.eth.Contract(
+            SWAP_REWARD_CHEF_ABI,
+            SWAP_REWARD_CHEF_ADDRESS
+          );
+          const MCSmartContractObj = new web3.eth.Contract(
+            MASTER_CHEF_ABI,
+            MASTER_CHEF_ADDRESS
+          );
+          const BTSmartContractObj = new web3.eth.Contract(
+            BUNNY_TOKEN_ABI,
+            BUNNY_TOKEN_ADDRESS
+          );
+          const BVSmartContractObj = new web3.eth.Contract(
+            BUNNY_VAULT_ABI,
+            BUNNY_VAULT_ADDRESS
           );
           dispatch(
             connectSuccess({
               account: accounts[0],
               smartContract: SmartContractObj,
+              SRCSmartContractObj,
+              MCSmartContractObj,
+              BTSmartContractObj,
+              BVSmartContractObj,
               web3: web3
             })
           );
@@ -112,6 +133,15 @@ export const connect = () => {
   };
 };
 
+export const setEnableVisibility = (status) => {
+  return (dispatch) => {
+    dispatch({
+      type: "SET_ENABLE_VISIBILITY",
+      payload: status
+    });
+  }
+}
+
 export const disconnect = () => {
   return async (dispatch) => {
     if (provider.close) {
@@ -123,6 +153,10 @@ export const disconnect = () => {
       connectSuccess({
         account: null,
         smartContract: null,
+        SRCSmartContractObj: null,
+        MCSmartContractObj: null,
+        BTSmartContractObj: null,
+        BVSmartContractObj: null,
         web3: null,
         loading: false
       }),

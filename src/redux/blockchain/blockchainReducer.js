@@ -2,6 +2,11 @@ const initialState = {
   loading: false,
   account: null,
   smartContract: null,
+  SRCSmartContractObj: null,
+  MCSmartContractObj: null,
+  BTSmartContractObj: null,
+  BVSmartContractObj: null,
+  isEnableVisible: true,
   web3: null,
   errorMsg: "",
 };
@@ -13,13 +18,16 @@ const blockchainReducer = (state = initialState, action) => {
         ...initialState,
         loading: true,
       };
+    case "SET_ENABLE_VISIBILITY":
+      return {
+        ...state,
+        isEnableVisible: action.payload
+      };
     case "CONNECTION_SUCCESS":
       return {
         ...state,
         loading: false,
-        account: action.payload.account,
-        smartContract: action.payload.smartContract,
-        web3: action.payload.web3,
+        ...action.payload
       };
     case "CONNECTION_FAILED":
       return {
